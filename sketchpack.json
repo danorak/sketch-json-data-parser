@@ -1,0 +1,5 @@
+{
+    "name": "Sketch JSON Data Parser",
+    "description": "A plugin that allows you to select a JSON file and use it to generate copies of your objects in Sketch",
+    "tags": ["JSON", "Data", "Iteration", "Lists", "Profiles"]
+}

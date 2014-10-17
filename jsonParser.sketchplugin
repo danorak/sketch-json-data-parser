@@ -1,0 +1,114 @@
+var softwareStudio = softwareStudio || {};
+
+var sp = softwareStudio.sketchPlugins = {};
+
+ sp.getFileUrl = function() {
+ 	var openPanel = [NSOpenPanel openPanel];
+
+	[openPanel setDirectoryURL:[NSURL fileURLWithPath:"~/Documents/"]];
+
+	[openPanel setTitle:@"Choose a file"];
+	[openPanel setPrompt:@"Choose"];
+	var buttonPressed = [openPanel runModal];
+	if(buttonPressed) {
+		print(buttonPressed);
+		print(openPanel.URLs);
+		var fileUrl = [[openPanel URLs] objectAtIndex:0];
+		return fileUrl;
+	}
+	
+ };
+
+ sp.getJSON = function(fileUrl) {
+	var result = 'No result';
+
+    var getString = NSString.stringWithContentsOfFile_encoding_error( fileUrl, NSUTF8StringEncoding, null );
+ 
+    if( getString ){
+        result = getString.toString();
+	}
+	else {
+		result = 'Could not parse';
+	}
+
+	print(result);
+
+	return result;
+
+ };
+
+sp.sketchDataParser = function() {
+	// Data parser (command l)
+
+	var loop = [selection objectEnumerator]
+	while (item = [loop nextObject]) {
+	
+	// Prompt JSON and parse it
+
+	var userJSON = sp.getJSON(sp.getFileUrl());
+	var json = userJSON, obj = JSON.parse(json);
+
+	// Iterate over the JSON data
+		for (var i = 0; i < obj.length; i++){
+
+			// Duplicate group
+			var newGroup = [item duplicate];
+			var newGroupLayersList = [newGroup layers]; // return an object instead of an array
+
+			// Iterating over the nested layers of the model group
+			for (var z = 0; z < newGroupLayersList.array().count(); z++){
+
+				// Store name of the layer and removing the first caracter
+				var layerName = newGroupLayersList.array()[z].name();
+				layerName = layerName.substring(1);
+				
+				// Loop in the JSON data to see if one layer is editable
+				for (var propt in obj[0]) {
+
+					if (layerName == propt) {
+
+						// Define current layer
+						var currentLayer = newGroupLayersList.array()[z];
+
+						// Regular expression to match URL images					
+						var urlRegexp = new RegExp('(http)[s]?(://)');
+
+						// Conditional test for image
+						if (urlRegexp.test(obj[i][propt])) {
+
+							// Transform URL in usable data for Sketch
+							var imageData = NSImage.alloc().initWithData(get(obj[i][propt]));
+
+							// Apply the image as pattern on the layer
+							layerStyle = currentLayer.style().fills().addNewStylePart();
+							layerStyle.fillType = 4;
+							layerStyle.patternImage = imageData;
+							layerStyle.patternFillType = 1;
+						
+						} else {
+							
+							// Define the new text value
+							var newStringValue = obj[i][propt];
+
+							// Apply the new value to the editable layer
+							currentLayer.setStringValue(newStringValue);
+							currentLayer.adjustFrameToFit(); // resize the text field
+
+						}
+					}
+				}
+			}
+			newGroup.resizeRoot(); // resize the group field
+		}
+	}
+
+	function get(url) {
+	  var request = NSURLRequest.requestWithURL(NSURL.URLWithString(url));
+	  var response = NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
+	  return response;
+	}
+}
+
+print('to here');
+
+sp.sketchDataParser();
