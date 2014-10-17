@@ -1,6 +1,6 @@
-var softwareStudio = softwareStudio || {};
+var danorak = danorak || {};
 
-var sp = softwareStudio.sketchPlugins = {};
+var sp = danorak.sketchPlugIns = {};
 
  sp.getFileUrl = function() {
  	var openPanel = [NSOpenPanel openPanel];
@@ -11,8 +11,6 @@ var sp = softwareStudio.sketchPlugins = {};
 	[openPanel setPrompt:@"Choose"];
 	var buttonPressed = [openPanel runModal];
 	if(buttonPressed) {
-		print(buttonPressed);
-		print(openPanel.URLs);
 		var fileUrl = [[openPanel URLs] objectAtIndex:0];
 		return fileUrl;
 	}
@@ -30,8 +28,6 @@ var sp = softwareStudio.sketchPlugins = {};
 	else {
 		result = 'Could not parse';
 	}
-
-	print(result);
 
 	return result;
 
@@ -108,7 +104,5 @@ sp.sketchDataParser = function() {
 	  return response;
 	}
 }
-
-print('to here');
 
 sp.sketchDataParser();
